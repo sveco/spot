@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SpotifyAPI;
+﻿using SpotifyAPI;
 using SpotifyAPI.Local;
 using SpotifyAPI.Local.Enums;
 using SpotifyAPI.Local.Models;
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace spot
 {
@@ -27,23 +24,24 @@ namespace spot
       var art2 = new Bitmap(art);
       _currentArt = art2;
     }
-    public static void Connect()
+    public static bool Connect()
     {
       if (!SpotifyLocalAPI.IsSpotifyRunning())
       {
         Console.WriteLine(@"Spotify isn't running!");
-        return;
+        return false;
       }
       if (!SpotifyLocalAPI.IsSpotifyWebHelperRunning())
       {
         Console.WriteLine(@"SpotifyWebHelper isn't running!");
-        return;
+        return false;
       }
 
       bool successful = _spotify.Connect();
       if (successful)
       {
         //Console.WriteLine(@"Connection to Spotify successful");
+        return true;
       }
       else
       {
@@ -52,6 +50,7 @@ namespace spot
         if (res.KeyChar == 'Y' || res.KeyChar == 'y')
           Connect();
       }
+      return true;
     }
 
     private static void RefreshStatus()
@@ -73,143 +72,159 @@ namespace spot
 
       _spotify = new SpotifyLocalAPI(_config);
 
-      Connect();
-
-      RefreshStatus();
-
-      if (parser.GetArgValue<bool>(new string[] { "-pause", "pp" }))
-      {
-        if (_currentStatus.Playing)
-        {
-          _spotify.Pause();
-        } else {
-          _spotify.Play();
-        }
-      }
-
-      if (parser.GetArgValue<bool>(new string[] { "-prev", "p" }))
-      {
-        if (_currentStatus.Playing)
-        {
-          _spotify.Previous();
-          _spotify.Previous();
-        }
-        else
-        {
-          _spotify.Previous();
-          _spotify.Play();
-        }
-      }
-
-      if (parser.GetArgValue<bool>(new string[] { "-next", "n" }))
-      {
-        if (_currentStatus.Playing)
-        {
-          _spotify.Skip();
-        }
-        else
-        {
-          _spotify.Skip();
-          _spotify.Play();
-        }
-      }
-
-      var e = parser.GetArgValue<string>(new string[] { "-export", "e" });
-      if (!String.IsNullOrEmpty(e))
-      {
-        try
-        {
-          var path = Path.GetFullPath(e);
-          if (_currentTrack != null)
-          {
-            GetAlbumArt().Wait();
-            if (_currentArt != null)
-            {
-              _currentArt.Save(path + "\\album.jpg", ImageFormat.Jpeg);
-            }
-          }
-        }
-        catch (NotSupportedException)
-        {
-          Console.WriteLine("Path not supproted.");
-        }
-      }
-
-      var v = parser.GetArgValue<int>(new string[] { "v", "-volume" }, -1);
-      if (v >= 0 && v <= 100)
-      {
-        _spotify.SetSpotifyVolume(v);
-      }
-
-      var u = parser.GetArgValue<string>(new string[] { "u", "-url"});
-      if (!String.IsNullOrEmpty(u))
-      {
-        _spotify.PlayURL(u);
-      }
-
       if (parser.GetArgValue<bool>(new string[] { "h", "-help" }))
       {
         ShowHelp();
       }
 
-      var g = parser.GetArgValue<string>(new string[] { "g", "-goto" }, string.Empty);
-      if (!String.IsNullOrEmpty(g))
+      if (Connect())
       {
-        switch (g.ToLower())
-        {
-          case "a":
-          case "artist":
-            _spotify.PlayURL(_currentTrack.ArtistResource?.Uri);
-            break;
-
-          case "b":
-          case "album":
-            _spotify.PlayURL(_currentTrack.AlbumResource?.Uri);
-            break;
-        }
-      }
-
-      //Status should be last
-      if (
-        args.Length == 0 ||
-        parser.GetArgValue<bool>(new string[] { "s", "-status" }))
-      {
-        string STATUS = "";
-        string CURRENT_TRACK = "No track";
-        string CURRENT_ARTIST = "";
-        const int TICKS_PER_SECOND = 10000000;
-
         RefreshStatus();
 
-        if (_currentTrack != null)
+        if (parser.GetArgValue<bool>(new string[] { "-pause", "pp" }))
         {
-          CURRENT_TRACK = _currentTrack.TrackResource?.Name;
-          CURRENT_ARTIST = _currentTrack.ArtistResource?.Name;
-        }
-
-        if (_currentStatus.Playing)
-        {
-          TimeSpan p = new TimeSpan((long)(_currentStatus.PlayingPosition * TICKS_PER_SECOND));
-          TimeSpan l = new TimeSpan((long)(_currentTrack.Length * TICKS_PER_SECOND));
-          if (l > new TimeSpan(1, 0, 0))
+          if (_currentStatus.Playing)
           {
-            STATUS = $"[PLAYING@{p.ToString(@"hh\:mm\:ss")}\\{l.ToString(@"hh\:mm\:ss")}]";
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            _spotify.Pause();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
           }
           else
           {
-            STATUS = $"[PLAYING@{p.ToString(@"mm\:ss")}\\{l.ToString(@"mm\:ss")}]";
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            _spotify.Play();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
           }
         }
-        else
+
+        if (parser.GetArgValue<bool>(new string[] { "-prev", "p" }))
         {
-          STATUS = "[STOPPED]";
+          if (_currentStatus.Playing)
+          {
+            _spotify.Previous();
+            _spotify.Previous();
+          }
+          else
+          {
+            _spotify.Previous();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            _spotify.Play();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+          }
         }
 
-        Console.WriteLine($"{CURRENT_TRACK} - {CURRENT_ARTIST} {STATUS}");
+        if (parser.GetArgValue<bool>(new string[] { "-next", "n" }))
+        {
+          if (_currentStatus.Playing)
+          {
+            _spotify.Skip();
+          }
+          else
+          {
+            _spotify.Skip();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            _spotify.Play();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+          }
+        }
+
+        var e = parser.GetArgValue<string>(new string[] { "-export", "e" });
+        if (!String.IsNullOrEmpty(e))
+        {
+          try
+          {
+            var path = Path.GetFullPath(e);
+            if (_currentTrack != null)
+            {
+              GetAlbumArt().Wait();
+              if (_currentArt != null)
+              {
+                _currentArt.Save(path + "\\album.jpg", ImageFormat.Jpeg);
+              }
+            }
+          }
+          catch (NotSupportedException)
+          {
+            Console.WriteLine("Path not supported.");
+          }
+        }
+
+        var v = parser.GetArgValue<int>(new string[] { "v", "-volume" }, -1);
+        if (v >= 0 && v <= 100)
+        {
+          _spotify.SetSpotifyVolume(v);
+        }
+
+        var u = parser.GetArgValue<string>(new string[] { "u", "-url" });
+        if (!String.IsNullOrEmpty(u))
+        {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+          _spotify.PlayURL(u);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        }
+
+        var g = parser.GetArgValue<string>(new string[] { "g", "-goto" }, string.Empty);
+        if (!String.IsNullOrEmpty(g) && _currentTrack != null)
+        {
+          switch (g.ToLower())
+          {
+            case "a":
+            case "artist":
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+              _spotify.PlayURL(_currentTrack.ArtistResource?.Uri);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+              break;
+
+            case "b":
+            case "album":
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+              _spotify.PlayURL(_currentTrack.AlbumResource?.Uri);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+              break;
+          }
+        }
+
+        //Status should be last
+        if (
+          args.Length == 0 ||
+          parser.GetArgValue<bool>(new string[] { "s", "-status" }))
+        {
+          string STATUS = "";
+          string CURRENT_TRACK = "No track";
+          string CURRENT_ARTIST = "";
+          const int TICKS_PER_SECOND = 10000000;
+
+          RefreshStatus();
+
+          if (_currentTrack != null)
+          {
+            CURRENT_TRACK = _currentTrack.TrackResource?.Name;
+            CURRENT_ARTIST = _currentTrack.ArtistResource?.Name;
+          }
+
+          if (_currentStatus.Playing)
+          {
+            TimeSpan p = new TimeSpan((long)(_currentStatus.PlayingPosition * TICKS_PER_SECOND));
+            TimeSpan l = new TimeSpan((long)(_currentTrack.Length * TICKS_PER_SECOND));
+            if (l > new TimeSpan(1, 0, 0))
+            {
+              STATUS = $"[PLAYING@{p.ToString(@"hh\:mm\:ss")}\\{l.ToString(@"hh\:mm\:ss")}]";
+            }
+            else
+            {
+              STATUS = $"[PLAYING@{p.ToString(@"mm\:ss")}\\{l.ToString(@"mm\:ss")}]";
+            }
+          }
+          else
+          {
+            STATUS = "[STOPPED]";
+          }
+
+          Console.WriteLine($"{CURRENT_TRACK} - {CURRENT_ARTIST} {STATUS}");
+        }
+
       }
-
     }
-
     private static void ShowHelp()
     {
       var h = @"Spotify cli interface. Requires Spotify to be running locally.
