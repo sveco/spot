@@ -125,7 +125,7 @@ namespace spot
             GetAlbumArt().Wait();
             if (_currentArt != null)
             {
-              _currentArt.Save(path + "album.jpg", ImageFormat.Jpeg);
+              _currentArt.Save(path + "\\album.jpg", ImageFormat.Jpeg);
             }
           }
         }

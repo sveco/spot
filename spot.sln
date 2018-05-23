@@ -3,12 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "spot", "spot\spot.csproj", "{A3C76F37-60D2-421F-BA66-C923B38557DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "spot-cli", "spot\spot-cli.csproj", "{A3C76F37-60D2-421F-BA66-C923B38557DD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E587FB73-07A7-46A1-8BE0-AFB2A00FE5A3}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyAPI", "..\..\..\..\Downloads\SpotifyAPI-NET-master\SpotifyAPI-NET-master\SpotifyAPI\SpotifyAPI.csproj", "{EBBE35E2-7B91-4D7D-B8FC-3A0472F5119D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +22,10 @@ Global
 		{A3C76F37-60D2-421F-BA66-C923B38557DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3C76F37-60D2-421F-BA66-C923B38557DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3C76F37-60D2-421F-BA66-C923B38557DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBBE35E2-7B91-4D7D-B8FC-3A0472F5119D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBBE35E2-7B91-4D7D-B8FC-3A0472F5119D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBBE35E2-7B91-4D7D-B8FC-3A0472F5119D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBBE35E2-7B91-4D7D-B8FC-3A0472F5119D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
